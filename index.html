@@ -1,0 +1,2987 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Discord ID Lookup — Full Report</title>
+    <meta name="description" content="Complete Discord user ID lookup: account age, Snowflake decode, avatar, banner, badges, presence, asset sizes, and raw public profile data." />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&family=Roboto:wght@400;500;700&family=Poppins:wght@400;500;600;700&family=Space+Grotesk:wght@400;500;600;700&family=Outfit:wght@400;500;600;700&display=swap" rel="stylesheet" />
+    <style>
+:root {
+        --bg: #0a0c10;
+        --surface: #12151c;
+        --surface-2: #1a1f2b;
+        --surface-3: #222836;
+        --border: #2a3142;
+        --border-soft: #1e2433;
+        --text: #e8ecf4;
+        --muted: #8b95a8;
+        --faint: #5c6578;
+        --accent: #5865f2;
+        --accent-hover: #4752c4;
+        --accent-soft: rgba(88,101,242,.15);
+        --success: #3ba55d;
+        --warn: #faa61a;
+        --warn-soft: rgba(250,166,26,.12);
+        --danger: #ed4245;
+        --danger-soft: rgba(237,66,69,.12);
+        --radius: 12px;
+        --shadow: 0 16px 48px rgba(0,0,0,.5);
+        --font-main: Inter, system-ui, sans-serif;
+        --bg-overlay: transparent;
+    }
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+        body {
+            font-family: var(--font-main);
+            background: var(--bg);
+            color: var(--text);
+            min-height: 100vh;
+            line-height: 1.5;
+            background-image:
+            radial-gradient(ellipse 90% 55% at 50% -25%, rgba(88,101,242,.2), transparent),
+            radial-gradient(ellipse 40% 35% at 100% 100%, rgba(88,101,242,.06), transparent);
+            background-attachment: fixed;
+            transition: font-family .2s;
+        }
+        body.has-bg-image {
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
+        }
+        body.has-bg-image::before {
+            content: "";
+            position: fixed;
+            inset: 0;
+            background: var(--bg-overlay);
+            pointer-events: none;
+            z-index: 0;
+        }
+        .wrap {
+            position: relative;
+            z-index: 1;
+        }
+        .wrap {
+            max-width: 980px;
+            margin: 0 auto;
+            padding: 28px 18px 80px;
+        }
+        header {
+            text-align: center;
+            margin-bottom: 28px;
+        }
+        .logo {
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            font-weight: 800;
+            font-size: 1.05rem;
+            letter-spacing: -0.02em;
+            color: var(--text);
+            text-decoration: none;
+            margin-bottom: 22px;
+        }
+        .logo-mark {
+            width: 34px;
+            height: 34px;
+            border-radius: 9px;
+            background: var(--accent);
+            display: grid;
+            place-items: center;
+        }
+        .logo-mark svg {
+            width: 18px;
+            height: 18px;
+            fill: white;
+        }
+        h1 {
+            font-size: clamp(1.7rem, 4vw, 2.5rem);
+            font-weight: 800;
+            letter-spacing: -0.03em;
+            line-height: 1.15;
+            margin-bottom: 10px;
+        }
+        .sub {
+            color: var(--muted);
+            font-size: .98rem;
+            max-width: 560px;
+            margin: 0 auto;
+        }
+        .search-card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 6px;
+            box-shadow: var(--shadow);
+            display: flex;
+            gap: 6px;
+            flex-wrap: wrap;
+            margin-bottom: 12px;
+        }
+        .search-card input {
+            flex: 1;
+            min-width: 180px;
+            background: transparent;
+            border: none;
+            outline: none;
+            color: var(--text);
+            font-size: 1.02rem;
+            font-weight: 600;
+            padding: 14px 16px;
+            font-family: "JetBrains Mono", ui-monospace, monospace;
+        }
+        .search-card input::placeholder {
+            color: var(--faint);
+            font-weight: 500;
+            font-family: Inter, sans-serif;
+        }
+        .btn {
+            background: var(--accent);
+            color: white;
+            border: none;
+            border-radius: 11px;
+            padding: 12px 22px;
+            font-weight: 700;
+            font-size: .9rem;
+            cursor: pointer;
+            font-family: inherit;
+            transition: background .15s, opacity .15s;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .btn:hover {
+            background: var(--accent-hover);
+        }
+        .btn:disabled {
+            opacity: .5;
+            cursor: not-allowed;
+        }
+        .btn-ghost {
+            background: var(--surface-2);
+            color: var(--text);
+            border: 1px solid var(--border);
+        }
+        .btn-ghost:hover {
+            background: var(--surface-3);
+            border-color: var(--muted);
+        }
+        .btn-sm {
+            padding: 6px 12px;
+            font-size: .78rem;
+            border-radius: 8px;
+        }
+        .hint {
+            text-align: center;
+            color: var(--muted);
+            font-size: .82rem;
+            margin-bottom: 22px;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            justify-content: center;
+            align-items: center;
+        }
+        .hint button {
+            background: var(--accent-soft);
+            border: 1px solid rgba(88,101,242,.3);
+            color: #a5b0ff;
+            font-weight: 600;
+            cursor: pointer;
+            font-family: "JetBrains Mono", monospace;
+            font-size: .78rem;
+            padding: 4px 10px;
+            border-radius: 6px;
+        }
+        .hint button:hover {
+            background: rgba(88,101,242,.25);
+        }
+        .error {
+            background: var(--danger-soft);
+            border: 1px solid rgba(237,66,69,.35);
+            color: #ff9a9c;
+            border-radius: var(--radius);
+            padding: 12px 16px;
+            margin-bottom: 16px;
+            display: none;
+            font-size: .9rem;
+        }
+        .error.show {
+            display: block;
+        }
+        .info-banner {
+            background: var(--warn-soft);
+            border: 1px solid rgba(250,166,26,.3);
+            color: #ffd48a;
+            border-radius: var(--radius);
+            padding: 10px 14px;
+            margin-bottom: 16px;
+            display: none;
+            font-size: .85rem;
+        }
+        .info-banner.show {
+            display: block;
+        }
+        .result {
+            display: none;
+            animation: fade .3s ease;
+        }
+        .result.show {
+            display: block;
+        }
+@keyframes fade {
+            from {
+                opacity: 0;
+                transform: translateY(6px);
+            }
+
+            to {
+                opacity: 1;
+                transform: none;
+            }
+        }
+        .profile-card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 18px;
+            overflow: hidden;
+            box-shadow: var(--shadow);
+            margin-bottom: 16px;
+        }
+        .banner {
+            height: 160px;
+            background: linear-gradient(135deg, #5865f2 0%, #2b2d6e 100%);
+            position: relative;
+        }
+        .banner img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            display: block;
+        }
+        .banner-actions {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            display: flex;
+            gap: 6px;
+        }
+        .avatar-row {
+            display: flex;
+            align-items: flex-end;
+            gap: 16px;
+            padding: 0 22px;
+            margin-top: -52px;
+            position: relative;
+        }
+        .avatar-wrap {
+            position: relative;
+            flex-shrink: 0;
+        }
+        .avatar {
+            width: 104px;
+            height: 104px;
+            border-radius: 50%;
+            border: 5px solid var(--surface);
+            background: var(--surface-2);
+            object-fit: cover;
+            display: block;
+        }
+        .status-dot {
+            position: absolute;
+            bottom: 6px;
+            right: 6px;
+            width: 22px;
+            height: 22px;
+            border-radius: 50%;
+            border: 4px solid var(--surface);
+            background: var(--faint);
+        }
+        .status-dot.online {
+            background: #23a559;
+        }
+        .status-dot.idle {
+            background: #f0b232;
+        }
+        .status-dot.dnd {
+            background: #f23f43;
+        }
+        .status-dot.offline {
+            background: #80848e;
+        }
+        .identity {
+            padding-bottom: 10px;
+            flex: 1;
+            min-width: 0;
+        }
+        .identity h2 {
+            font-size: 1.5rem;
+            font-weight: 800;
+            letter-spacing: -0.02em;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        .identity .tag {
+            color: var(--muted);
+            font-size: .92rem;
+            font-weight: 500;
+            font-family: "JetBrains Mono", monospace;
+        }
+        .identity .id-line {
+            color: var(--faint);
+            font-size: .78rem;
+            font-family: "JetBrains Mono", monospace;
+            margin-top: 2px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            flex-wrap: wrap;
+        }
+        .badges {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+            padding: 14px 22px 0;
+        }
+        .badge {
+            background: var(--surface-2);
+            border: 1px solid var(--border);
+            border-radius: 999px;
+            padding: 4px 11px;
+            font-size: .72rem;
+            font-weight: 600;
+            color: var(--muted);
+            cursor: default;
+        }
+        .badge.bot {
+            color: #57f287;
+            border-color: rgba(87,242,135,.35);
+            background: rgba(87,242,135,.08);
+        }
+        .badge.staff {
+            color: #5865f2;
+            border-color: rgba(88,101,242,.4);
+        }
+        .badge[title] {
+            cursor: help;
+        }
+        .quick-actions {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            padding: 14px 22px 0;
+        }
+        .meta-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+            gap: 10px;
+            padding: 18px 22px 22px;
+        }
+        .meta {
+            background: var(--surface-2);
+            border: 1px solid var(--border);
+            border-radius: 11px;
+            padding: 12px 14px;
+        }
+        .meta label {
+            display: block;
+            font-size: .65rem;
+            font-weight: 700;
+            letter-spacing: .08em;
+            text-transform: uppercase;
+            color: var(--faint);
+            margin-bottom: 3px;
+        }
+        .meta .val {
+            font-size: .9rem;
+            font-weight: 600;
+            word-break: break-all;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            flex-wrap: wrap;
+        }
+        .meta .val .mono {
+            font-family: "JetBrains Mono", monospace;
+            font-size: .82rem;
+        }
+        .swatch {
+            width: 14px;
+            height: 14px;
+            border-radius: 4px;
+            border: 1px solid rgba(255,255,255,.2);
+            flex-shrink: 0;
+        }
+        .section {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 14px;
+            padding: 18px 20px;
+            margin-bottom: 14px;
+        }
+        .section-head {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+            margin-bottom: 14px;
+            flex-wrap: wrap;
+        }
+        .section h3 {
+            font-size: .72rem;
+            font-weight: 700;
+            letter-spacing: .1em;
+            text-transform: uppercase;
+            color: var(--faint);
+        }
+        .section p.desc {
+            color: var(--muted);
+            font-size: .85rem;
+            margin-bottom: 12px;
+        }
+        .grid-2 {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 10px;
+        }
+        .grid-3 {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+            gap: 10px;
+        }
+        .bit {
+            background: var(--surface-2);
+            border-radius: 10px;
+            padding: 11px 13px;
+            border: 1px solid var(--border);
+        }
+        .bit span {
+            color: var(--faint);
+            display: block;
+            font-size: .65rem;
+            margin-bottom: 3px;
+            font-weight: 700;
+            letter-spacing: .06em;
+            text-transform: uppercase;
+        }
+        .bit .v {
+            font-family: "JetBrains Mono", monospace;
+            font-size: .85rem;
+            font-weight: 500;
+            word-break: break-all;
+        }
+        .assets {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+        .asset-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            background: var(--surface-2);
+            border: 1px solid var(--border);
+            border-radius: 9px;
+            padding: 8px 12px;
+            color: var(--text);
+            text-decoration: none;
+            font-size: .82rem;
+            font-weight: 600;
+            transition: border-color .15s;
+        }
+        .asset-link:hover {
+            border-color: var(--accent);
+            color: #a5b0ff;
+        }
+        .size-grid {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+            margin-top: 10px;
+        }
+        .size-chip {
+            font-family: "JetBrains Mono", monospace;
+            font-size: .72rem;
+            padding: 5px 9px;
+            background: var(--surface-3);
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            color: var(--muted);
+            text-decoration: none;
+            font-weight: 500;
+        }
+        .size-chip:hover {
+            border-color: var(--accent);
+            color: var(--text);
+        }
+        .insight {
+            display: flex;
+            gap: 12px;
+            padding: 12px 14px;
+            background: var(--surface-2);
+            border-radius: 10px;
+            border: 1px solid var(--border);
+            margin-bottom: 8px;
+        }
+        .insight:last-child {
+            margin-bottom: 0;
+        }
+        .insight-icon {
+            width: 36px;
+            height: 36px;
+            border-radius: 9px;
+            display: grid;
+            place-items: center;
+            flex-shrink: 0;
+            font-size: 1rem;
+            background: var(--accent-soft);
+        }
+        .insight strong {
+            display: block;
+            font-size: .9rem;
+            margin-bottom: 2px;
+        }
+        .insight p {
+            color: var(--muted);
+            font-size: .82rem;
+        }
+        .activity {
+            background: var(--surface-2);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 12px 14px;
+            margin-bottom: 8px;
+        }
+        .activity .name {
+            font-weight: 700;
+            font-size: .92rem;
+        }
+        .activity .detail {
+            color: var(--muted);
+            font-size: .82rem;
+            margin-top: 2px;
+        }
+        .activity .type {
+            font-size: .68rem;
+            font-weight: 700;
+            letter-spacing: .06em;
+            text-transform: uppercase;
+            color: var(--faint);
+            margin-bottom: 4px;
+        }
+        .timeline {
+            position: relative;
+            padding-left: 18px;
+            border-left: 2px solid var(--border);
+            margin-left: 6px;
+        }
+        .tl-item {
+            position: relative;
+            padding: 0 0 16px 14px;
+        }
+        .tl-item:last-child {
+            padding-bottom: 0;
+        }
+        .tl-item::before {
+            content: "";
+            position: absolute;
+            left: -21px;
+            top: 5px;
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            background: var(--accent);
+            border: 2px solid var(--surface);
+        }
+        .tl-item .when {
+            font-size: .72rem;
+            color: var(--faint);
+            font-weight: 600;
+        }
+        .tl-item .what {
+            font-size: .9rem;
+            font-weight: 600;
+        }
+        pre.raw {
+            background: #0d0f14;
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 14px;
+            font-family: "JetBrains Mono", monospace;
+            font-size: .75rem;
+            overflow-x: auto;
+            max-height: 420px;
+            color: #b8c0d0;
+            line-height: 1.55;
+            white-space: pre-wrap;
+            word-break: break-word;
+        }
+        .history-list {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+        .hist-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 10px;
+            padding: 10px 12px;
+            background: var(--surface-2);
+            border: 1px solid var(--border);
+            border-radius: 9px;
+            cursor: pointer;
+            transition: border-color .15s;
+        }
+        .hist-item:hover {
+            border-color: var(--accent);
+        }
+        .hist-item .hid {
+            font-family: "JetBrains Mono", monospace;
+            font-size: .82rem;
+            font-weight: 600;
+        }
+        .hist-item .hmeta {
+            color: var(--faint);
+            font-size: .75rem;
+        }
+        .tabs {
+            display: flex;
+            gap: 4px;
+            flex-wrap: wrap;
+            margin-bottom: 14px;
+            border-bottom: 1px solid var(--border);
+            padding-bottom: 0;
+        }
+        .tab {
+            background: none;
+            border: none;
+            color: var(--muted);
+            font-family: inherit;
+            font-weight: 600;
+            font-size: .85rem;
+            padding: 10px 14px;
+            cursor: pointer;
+            border-bottom: 2px solid transparent;
+            margin-bottom: -1px;
+            transition: color .15s, border-color .15s;
+        }
+        .tab:hover {
+            color: var(--text);
+        }
+        .tab.active {
+            color: var(--accent);
+            border-bottom-color: var(--accent);
+        }
+        .tab-panel {
+            display: none;
+        }
+        .tab-panel.active {
+            display: block;
+        }
+        .bits-row {
+            font-family: "JetBrains Mono", monospace;
+            font-size: .7rem;
+            word-break: break-all;
+            background: var(--surface-2);
+            border-radius: 8px;
+            padding: 10px 12px;
+            border: 1px solid var(--border);
+            line-height: 1.7;
+        }
+        .bits-row .ts {
+            color: #57f287;
+        }
+        .bits-row .wk {
+            color: #faa61a;
+        }
+        .bits-row .pr {
+            color: #00b0f4;
+        }
+        .bits-row .inc {
+            color: #f47fff;
+        }
+        .legend {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px;
+            margin-top: 8px;
+            font-size: .72rem;
+            color: var(--muted);
+        }
+        .legend i {
+            display: inline-block;
+            width: 10px;
+            height: 10px;
+            border-radius: 2px;
+            margin-right: 4px;
+            vertical-align: middle;
+        }
+        footer {
+            text-align: center;
+            color: var(--faint);
+            font-size: .75rem;
+            margin-top: 40px;
+            padding-top: 20px;
+            border-top: 1px solid var(--border-soft);
+            line-height: 1.6;
+        }
+        .spinner {
+            width: 16px;
+            height: 16px;
+            border: 2px solid rgba(255,255,255,.3);
+            border-top-color: white;
+            border-radius: 50%;
+            animation: spin .65s linear infinite;
+            display: inline-block;
+        }
+@keyframes spin {
+            to {
+                transform: rotate(360deg);
+            }
+        }
+        .copy-toast {
+            position: fixed;
+            bottom: 24px;
+            left: 50%;
+            transform: translateX(-50%) translateY(20px);
+            background: #1e1f22;
+            border: 1px solid var(--border);
+            color: var(--text);
+            padding: 10px 18px;
+            border-radius: 10px;
+            font-size: .85rem;
+            font-weight: 600;
+            opacity: 0;
+            pointer-events: none;
+            transition: .25s;
+            z-index: 100;
+            box-shadow: var(--shadow);
+        }
+        .copy-toast.show {
+            opacity: 1;
+            transform: translateX(-50%) translateY(0);
+        }
+
+        /* Top bar + Discord login */
+        .topbar {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+            margin-bottom: 8px;
+            flex-wrap: wrap;
+        }
+        .topbar .logo {
+            margin-bottom: 0;
+        }
+        .topbar-right {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+        .live-count {
+            display: inline-flex;
+            align-items: center;
+            gap: 7px;
+            background: var(--surface-2);
+            border: 1px solid var(--border);
+            border-radius: 999px;
+            padding: 7px 12px 7px 10px;
+            font-size: .78rem;
+            font-weight: 600;
+            color: var(--muted);
+            white-space: nowrap;
+        }
+        .live-count .dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: var(--success);
+            box-shadow: 0 0 0 0 rgba(59,165,93,.5);
+            animation: pulse-dot 2s ease infinite;
+        }
+@keyframes pulse-dot {
+            0% {
+                box-shadow: 0 0 0 0 rgba(59,165,93,.45);
+            }
+            70% {
+                box-shadow: 0 0 0 8px rgba(59,165,93,0);
+            }
+            100% {
+                box-shadow: 0 0 0 0 rgba(59,165,93,0);
+            }
+        }
+        .live-count strong {
+            color: var(--text);
+            font-variant-numeric: tabular-nums;
+        }
+        .btn-discord {
+            background: #5865f2;
+            color: #fff;
+            border: none;
+            border-radius: 10px;
+            padding: 10px 16px;
+            font-weight: 700;
+            font-size: .88rem;
+            cursor: pointer;
+            font-family: inherit;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            transition: background .15s, transform .1s;
+        }
+        .btn-discord:hover {
+            background: #4752c4;
+        }
+        .btn-discord svg {
+            width: 18px;
+            height: 18px;
+            fill: currentColor;
+        }
+        .btn-discord.connected {
+            background: var(--surface-2);
+            border: 1px solid var(--border);
+            color: var(--text);
+        }
+
+        /* Menu button + dropdown */
+        .menu-wrap {
+            position: relative;
+        }
+        .btn-menu {
+            width: 40px;
+            height: 40px;
+            border-radius: 10px;
+            background: var(--surface-2);
+            border: 1px solid var(--border);
+            color: var(--text);
+            cursor: pointer;
+            display: grid;
+            place-items: center;
+            transition: background .15s, border-color .15s;
+        }
+        .btn-menu:hover, .btn-menu.open {
+            background: var(--surface-3);
+            border-color: var(--muted);
+        }
+        .btn-menu svg {
+            width: 18px;
+            height: 18px;
+        }
+        .dropdown {
+            position: absolute;
+            top: calc(100% + 8px);
+            right: 0;
+            min-width: 200px;
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            box-shadow: var(--shadow);
+            padding: 6px;
+            z-index: 50;
+            display: none;
+            animation: fade .15s ease;
+        }
+        .dropdown.show {
+            display: block;
+        }
+        .dropdown button, .dropdown a {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            width: 100%;
+            padding: 10px 12px;
+            border: none;
+            background: transparent;
+            color: var(--text);
+            font-family: inherit;
+            font-size: .88rem;
+            font-weight: 600;
+            text-align: left;
+            cursor: pointer;
+            border-radius: 8px;
+            text-decoration: none;
+            transition: background .12s;
+        }
+        .dropdown button:hover, .dropdown a:hover {
+            background: var(--surface-2);
+        }
+        .dropdown .sep {
+            height: 1px;
+            background: var(--border);
+            margin: 4px 6px;
+        }
+        .dropdown svg {
+            width: 16px;
+            height: 16px;
+            opacity: .75;
+            flex-shrink: 0;
+        }
+
+        /* Settings modal extras */
+        .settings-grid {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+        .setting-block {
+            background: var(--surface-2);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 14px 16px;
+        }
+        .setting-block h4 {
+            font-size: .72rem;
+            font-weight: 700;
+            letter-spacing: .08em;
+            text-transform: uppercase;
+            color: var(--faint);
+            margin-bottom: 10px;
+        }
+        .setting-row {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            align-items: center;
+        }
+        .setting-row label {
+            font-size: .85rem;
+            color: var(--muted);
+            min-width: 90px;
+        }
+        .setting-block input[type="text"],
+        .setting-block input[type="url"],
+        .setting-block select,
+        .setting-block input[type="range"] {
+            flex: 1;
+            min-width: 120px;
+            background: var(--surface-3);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            color: var(--text);
+            padding: 8px 12px;
+            font-family: inherit;
+            font-size: .88rem;
+            outline: none;
+        }
+        .setting-block input[type="range"] {
+            padding: 0;
+            accent-color: var(--accent);
+        }
+        .setting-block input[type="file"] {
+            font-size: .8rem;
+            color: var(--muted);
+            max-width: 100%;
+        }
+        .setting-block .hint-sm {
+            font-size: .75rem;
+            color: var(--faint);
+            margin-top: 6px;
+        }
+        .music-controls {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+        .color-swatches {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+        }
+        .color-swatch-btn {
+            width: 28px;
+            height: 28px;
+            border-radius: 8px;
+            border: 2px solid transparent;
+            cursor: pointer;
+            transition: border-color .15s, transform .1s;
+        }
+        .color-swatch-btn:hover, .color-swatch-btn.active {
+            border-color: #fff;
+            transform: scale(1.08);
+        }
+        .legal-body {
+            max-height: 50vh;
+            overflow-y: auto;
+            font-size: .88rem;
+            color: var(--muted);
+            line-height: 1.6;
+        }
+        .legal-body h3 {
+            color: var(--text);
+            font-size: 1rem;
+            margin: 14px 0 6px;
+        }
+        .legal-body p {
+            margin-bottom: 10px;
+        }
+        .modal.wide {
+            max-width: 520px;
+        }
+
+        /* Modal */
+        .modal-backdrop {
+            position: fixed;
+            inset: 0;
+            z-index: 200;
+            background: rgba(0,0,0,.65);
+            backdrop-filter: blur(6px);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+        .modal-backdrop.show {
+            display: flex;
+        }
+        .modal {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            max-width: 440px;
+            width: 100%;
+            box-shadow: var(--shadow);
+            overflow: hidden;
+            animation: fade .25s ease;
+        }
+        .modal-header {
+            padding: 20px 22px 12px;
+            display: flex;
+            align-items: flex-start;
+            gap: 12px;
+        }
+        .modal-header .icon {
+            width: 44px;
+            height: 44px;
+            border-radius: 12px;
+            background: var(--accent);
+            display: grid;
+            place-items: center;
+            flex-shrink: 0;
+        }
+        .modal-header .icon svg {
+            width: 22px;
+            height: 22px;
+            fill: white;
+        }
+        .modal-header h2 {
+            font-size: 1.15rem;
+            font-weight: 800;
+            letter-spacing: -0.02em;
+        }
+        .modal-header p {
+            color: var(--muted);
+            font-size: .88rem;
+            margin-top: 4px;
+        }
+        .modal-body {
+            padding: 4px 22px 18px;
+        }
+        .scope-list {
+            list-style: none;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            margin: 12px 0 0;
+        }
+        .scope-list li {
+            display: flex;
+            gap: 10px;
+            align-items: flex-start;
+            background: var(--surface-2);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 10px 12px;
+            font-size: .85rem;
+        }
+        .scope-list li strong {
+            display: block;
+            font-size: .88rem;
+            margin-bottom: 2px;
+        }
+        .scope-list li span {
+            color: var(--muted);
+            font-size: .8rem;
+        }
+        .scope-icon {
+            width: 28px;
+            height: 28px;
+            border-radius: 8px;
+            background: var(--accent-soft);
+            color: #a5b0ff;
+            display: grid;
+            place-items: center;
+            flex-shrink: 0;
+            font-size: .85rem;
+            font-weight: 700;
+        }
+        .modal-note {
+            margin-top: 14px;
+            font-size: .78rem;
+            color: var(--faint);
+            line-height: 1.45;
+        }
+        .modal-actions {
+            display: flex;
+            gap: 8px;
+            padding: 0 22px 20px;
+            flex-wrap: wrap;
+        }
+        .modal-actions .btn {
+            flex: 1;
+            min-width: 120px;
+            justify-content: center;
+        }
+        .modal-actions .btn-ghost {
+            flex: 1;
+            min-width: 100px;
+            justify-content: center;
+        }
+
+@media (max-width: 560px) {
+            .avatar-row {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+            .avatar {
+                margin-left: 4px;
+            }
+            .banner {
+                height: 120px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="wrap">
+        <header>
+            <div class="topbar">
+                <a class="logo" href="#">
+                    <span class="logo-mark">
+                        <svg viewBox="0 0 24 24"><path d="M20.317 4.37a19.791 19.791 0 0 0-4.885-1.515.074.074 0 0 0-.079.037c-.21.375-.444.864-.608 1.25a18.27 18.27 0 0 0-5.487 0 12.64 12.64 0 0 0-.617-1.25.077.077 0 0 0-.079-.037A19.736 19.736 0 0 0 3.677 4.37a.07.07 0 0 0-.032.027C.533 9.046-.32 13.58.099 18.057a.082.082 0 0 0 .031.057 19.9 19.9 0 0 0 5.993 3.03.078.078 0 0 0 .084-.028 14.09 14.09 0 0 0 1.226-1.994.076.076 0 0 0-.041-.106 13.107 13.107 0 0 1-1.872-.892.077.077 0 0 1-.008-.128 10.2 10.2 0 0 0 .372-.292.074.074 0 0 1 .077-.01c3.928 1.793 8.18 1.793 12.062 0a.074.074 0 0 1 .078.01c.12.098.246.198.373.292a.077.077 0 0 1-.006.127 12.299 12.299 0 0 1-1.873.892.077.077 0 0 0-.041.107c.36.698.772 1.362 1.225 1.993a.076.076 0 0 0 .084.028 19.839 19.839 0 0 0 6.002-3.03.077.077 0 0 0 .032-.054c.5-5.177-.838-9.674-3.549-13.66a.061.061 0 0 0-.031-.03zM8.02 15.33c-1.183 0-2.157-1.085-2.157-2.419 0-1.333.956-2.419 2.157-2.419 1.21 0 2.176 1.096 2.157 2.42 0 1.333-.956 2.418-2.157 2.418zm7.975 0c-1.183 0-2.157-1.085-2.157-2.419 0-1.333.955-2.419 2.157-2.419 1.21 0 2.176 1.096 2.157 2.42 0 1.333-.946 2.418-2.157 2.418z" /></svg>
+                    </span>
+                    DiscordLookup
+                </a>
+                <div class="topbar-right">
+                    <div class="live-count" id="liveCount" title="Approximate concurrent visitors (demo estimate)">
+                        <span class="dot" aria-hidden="true"></span>
+                        <span><strong id="liveCountNum">—</strong> online</span>
+                    </div>
+                    <button type="button" class="btn-discord" id="discordLoginBtn" aria-haspopup="dialog">
+                        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20.317 4.37a19.791 19.791 0 0 0-4.885-1.515.074.074 0 0 0-.079.037c-.21.375-.444.864-.608 1.25a18.27 18.27 0 0 0-5.487 0 12.64 12.64 0 0 0-.617-1.25.077.077 0 0 0-.079-.037A19.736 19.736 0 0 0 3.677 4.37a.07.07 0 0 0-.032.027C.533 9.046-.32 13.58.099 18.057a.082.082 0 0 0 .031.057 19.9 19.9 0 0 0 5.993 3.03.078.078 0 0 0 .084-.028 14.09 14.09 0 0 0 1.226-1.994.076.076 0 0 0-.041-.106 13.107 13.107 0 0 1-1.872-.892.077.077 0 0 1-.008-.128 10.2 10.2 0 0 0 .372-.292.074.074 0 0 1 .077-.01c3.928 1.793 8.18 1.793 12.062 0a.074.074 0 0 1 .078.01c.12.098.246.198.373.292a.077.077 0 0 1-.006.127 12.299 12.299 0 0 1-1.873.892.077.077 0 0 0-.041.107c.36.698.772 1.362 1.225 1.993a.076.076 0 0 0 .084.028 19.839 19.839 0 0 0 6.002-3.03.077.077 0 0 0 .032-.054c.5-5.177-.838-9.674-3.549-13.66a.061.061 0 0 0-.031-.03zM8.02 15.33c-1.183 0-2.157-1.085-2.157-2.419 0-1.333.956-2.419 2.157-2.419 1.21 0 2.176 1.096 2.157 2.42 0 1.333-.956 2.418-2.157 2.418zm7.975 0c-1.183 0-2.157-1.085-2.157-2.419 0-1.333.955-2.419 2.157-2.419 1.21 0 2.176 1.096 2.157 2.42 0 1.333-.946 2.418-2.157 2.418z" /></svg>
+                        Sign in with Discord
+                    </button>
+                    <div class="menu-wrap">
+                        <button type="button" class="btn-menu" id="menuBtn" aria-haspopup="true" aria-expanded="false" title="Menu">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true">
+                                <circle cx="12" cy="5" r="1.5" /><circle cx="12" cy="12" r="1.5" /><circle cx="12" cy="19" r="1.5" />
+                            </svg>
+                        </button>
+                        <div class="dropdown" id="menuDropdown" role="menu">
+                            <button type="button" role="menuitem" id="menuSettings">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3" /><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42" /></svg>
+                                Settings
+                            </button>
+                            <div class="sep"></div>
+                            <button type="button" role="menuitem" id="menuPolicy">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" /></svg>
+                                Policy
+                            </button>
+                            <button type="button" role="menuitem" id="menuTerms">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" /><path d="M14 2v6h6M16 13H8M16 17H8M10 9H8" /></svg>
+                                Terms
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <h1>Discord ID Full Report</h1>
+            <p class="sub">
+                OSINT GOD🌚
+            </p>
+        </header>
+
+        <!-- Discord OAuth consent modal -->
+        <div class="modal-backdrop" id="authModal" role="dialog" aria-modal="true" aria-labelledby="authModalTitle">
+            <div class="modal">
+                <div class="modal-header">
+                    <div class="icon">
+                        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20.317 4.37a19.791 19.791 0 0 0-4.885-1.515.074.074 0 0 0-.079.037c-.21.375-.444.864-.608 1.25a18.27 18.27 0 0 0-5.487 0 12.64 12.64 0 0 0-.617-1.25.077.077 0 0 0-.079-.037A19.736 19.736 0 0 0 3.677 4.37a.07.07 0 0 0-.032.027C.533 9.046-.32 13.58.099 18.057a.082.082 0 0 0 .031.057 19.9 19.9 0 0 0 5.993 3.03.078.078 0 0 0 .084-.028 14.09 14.09 0 0 0 1.226-1.994.076.076 0 0 0-.041-.106 13.107 13.107 0 0 1-1.872-.892.077.077 0 0 1-.008-.128 10.2 10.2 0 0 0 .372-.292.074.074 0 0 1 .077-.01c3.928 1.793 8.18 1.793 12.062 0a.074.074 0 0 1 .078.01c.12.098.246.198.373.292a.077.077 0 0 1-.006.127 12.299 12.299 0 0 1-1.873.892.077.077 0 0 0-.041.107c.36.698.772 1.362 1.225 1.993a.076.076 0 0 0 .084.028 19.839 19.839 0 0 0 6.002-3.03.077.077 0 0 0 .032-.054c.5-5.177-.838-9.674-3.549-13.66a.061.061 0 0 0-.031-.03zM8.02 15.33c-1.183 0-2.157-1.085-2.157-2.419 0-1.333.956-2.419 2.157-2.419 1.21 0 2.176 1.096 2.157 2.42 0 1.333-.956 2.418-2.157 2.418zm7.975 0c-1.183 0-2.157-1.085-2.157-2.419 0-1.333.955-2.419 2.157-2.419 1.21 0 2.176 1.096 2.157 2.42 0 1.333-.946 2.418-2.157 2.418z" /></svg>
+                    </div>
+                    <div>
+                        <h2 id="authModalTitle">Continue with Discord?</h2>
+                        <p>
+                            Sign in, then you can join the community server.
+                        </p>
+                    </div>
+                </div>
+                <div class="modal-body">
+                    <p class="desc" style="margin:0;color:var(--muted);font-size:.88rem">
+                        This will ask Discord for:
+                    </p>
+                    <ul class="scope-list">
+                        <li>
+                            <div class="scope-icon">
+                                ID
+                            </div>
+                            <div>
+                                <strong>Identify</strong>
+                                <span>Your Discord username, avatar, and user ID</span>
+                            </div>
+                        </li>
+                        <li>
+                            <div class="scope-icon">
+                                @
+                            </div>
+                            <div>
+                                <strong>Email</strong>
+                                <span>The email on your Discord account</span>
+                            </div>
+                        </li>
+                        <li>
+                            <div class="scope-icon">
+                                +
+                            </div>
+                            <div>
+                                <strong>Join server</strong>
+                                <span>Permission for the app to add you to a guild (needs a backend + bot to complete)</span>
+                            </div>
+                        </li>
+                    </ul>
+                    <p class="modal-note">
+                        <strong>Authorize</strong> opens Discord’s OAuth screen for this app (client id <code>1553522655142092870</code>).<br />
+                        <strong>Join server only</strong> opens the invite <code>discord.gg/UwrjqjTsUt</code> without OAuth.<br />
+                        Note: <code>redirect_uri</code> must be a URL registered in the Discord Developer Portal. A <code>discord.gg</code> invite is not a valid OAuth redirect — use a real callback page on your domain for production. Revoke access anytime in Discord → Settings → Authorized Apps.
+                    </p>
+                </div>
+                <div class="modal-actions">
+                    <button type="button" class="btn btn-ghost" id="authCancelBtn">Cancel</button>
+                    <button type="button" class="btn btn-ghost" id="authJoinOnlyBtn">Join server only</button>
+                    <button type="button" class="btn btn-discord" id="authConfirmBtn">
+                        <svg viewBox="0 0 24 24" aria-hidden="true" width="18" height="18"><path fill="currentColor" d="M20.317 4.37a19.791 19.791 0 0 0-4.885-1.515.074.074 0 0 0-.079.037c-.21.375-.444.864-.608 1.25a18.27 18.27 0 0 0-5.487 0 12.64 12.64 0 0 0-.617-1.25.077.077 0 0 0-.079-.037A19.736 19.736 0 0 0 3.677 4.37a.07.07 0 0 0-.032.027C.533 9.046-.32 13.58.099 18.057a.082.082 0 0 0 .031.057 19.9 19.9 0 0 0 5.993 3.03.078.078 0 0 0 .084-.028 14.09 14.09 0 0 0 1.226-1.994.076.076 0 0 0-.041-.106 13.107 13.107 0 0 1-1.872-.892.077.077 0 0 1-.008-.128 10.2 10.2 0 0 0 .372-.292.074.074 0 0 1 .077-.01c3.928 1.793 8.18 1.793 12.062 0a.074.074 0 0 1 .078.01c.12.098.246.198.373.292a.077.077 0 0 1-.006.127 12.299 12.299 0 0 1-1.873.892.077.077 0 0 0-.041.107c.36.698.772 1.362 1.225 1.993a.076.076 0 0 0 .084.028 19.839 19.839 0 0 0 6.002-3.03.077.077 0 0 0 .032-.054c.5-5.177-.838-9.674-3.549-13.66a.061.061 0 0 0-.031-.03zM8.02 15.33c-1.183 0-2.157-1.085-2.157-2.419 0-1.333.956-2.419 2.157-2.419 1.21 0 2.176 1.096 2.157 2.42 0 1.333-.956 2.418-2.157 2.418zm7.975 0c-1.183 0-2.157-1.085-2.157-2.419 0-1.333.955-2.419 2.157-2.419 1.21 0 2.176 1.096 2.157 2.42 0 1.333-.946 2.418-2.157 2.418z" /></svg>
+                        Authorize with Discord
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Settings modal -->
+        <div class="modal-backdrop" id="settingsModal" role="dialog" aria-modal="true" aria-labelledby="settingsTitle">
+            <div class="modal wide">
+                <div class="modal-header">
+                    <div class="icon" style="background:var(--surface-3)">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" width="22" height="22"><circle cx="12" cy="12" r="3" /><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42" /></svg>
+                    </div>
+                    <div>
+                        <h2 id="settingsTitle">Settings</h2>
+                        <p>
+                            Customize look, background, and music — saved in this browser.
+                        </p>
+                    </div>
+                </div>
+                <div class="modal-body">
+                    <div class="settings-grid">
+                        <div class="setting-block">
+                            <h4>Font</h4>
+                            <div class="setting-row">
+                                <label for="fontSelect">Family</label>
+                                <select id="fontSelect">
+                                    <option value="Inter, system-ui, sans-serif">Inter (default)</option>
+                                    <option value="Roboto, system-ui, sans-serif">Roboto</option>
+                                    <option value="Poppins, system-ui, sans-serif">Poppins</option>
+                                    <option value="'Space Grotesk', system-ui, sans-serif">Space Grotesk</option>
+                                    <option value="Outfit, system-ui, sans-serif">Outfit</option>
+                                    <option value="system-ui, sans-serif">System UI</option>
+                                    <option value="'JetBrains Mono', ui-monospace, monospace">JetBrains Mono</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="setting-block">
+                            <h4>Background color</h4>
+                            <div class="color-swatches" id="bgColorSwatches">
+                                <button type="button" class="color-swatch-btn" data-bg="#0a0c10" style="background:#0a0c10" title="Default"></button>
+                                <button type="button" class="color-swatch-btn" data-bg="#0d1117" style="background:#0d1117" title="GitHub dark"></button>
+                                <button type="button" class="color-swatch-btn" data-bg="#1a0a2e" style="background:#1a0a2e" title="Purple night"></button>
+                                <button type="button" class="color-swatch-btn" data-bg="#0a1a14" style="background:#0a1a14" title="Forest"></button>
+                                <button type="button" class="color-swatch-btn" data-bg="#1a1010" style="background:#1a1010" title="Warm dark"></button>
+                                <button type="button" class="color-swatch-btn" data-bg="#0a1628" style="background:#0a1628" title="Deep blue"></button>
+                            </div>
+                            <div class="setting-row" style="margin-top:10px">
+                                <label for="bgColorCustom">Custom</label>
+                                <input type="text" id="bgColorCustom" placeholder="#0a0c10" maxlength="7" />
+                                <button type="button" class="btn btn-ghost btn-sm" id="applyBgColor">Apply</button>
+                            </div>
+                        </div>
+                        <div class="setting-block">
+                            <h4>Background image</h4>
+                            <div class="setting-row">
+                                <label for="bgImageUrl">Image URL</label>
+                                <input type="url" id="bgImageUrl" placeholder="https://… or leave empty" />
+                            </div>
+                            <div class="setting-row" style="margin-top:8px">
+                                <label for="bgImageFile">Upload</label>
+                                <input type="file" id="bgImageFile" accept="image/*" />
+                            </div>
+                            <div class="setting-row" style="margin-top:8px">
+                                <label for="bgOverlay">Darken</label>
+                                <input type="range" id="bgOverlay" min="0" max="90" value="40" />
+                                <span id="bgOverlayVal" style="font-size:.8rem;color:var(--muted);min-width:36px">40%</span>
+                            </div>
+                            <p class="hint-sm">
+                                Upload stays in this browser only (not uploaded to a server). Large images may slow the page.
+                            </p>
+                            <div class="setting-row" style="margin-top:8px">
+                                <button type="button" class="btn btn-ghost btn-sm" id="clearBgImage">Clear image</button>
+                            </div>
+                        </div>
+                        <div class="setting-block">
+                            <h4>Background music</h4>
+                            <div class="setting-row">
+                                <label for="musicUrl">Audio URL</label>
+                                <input type="url" id="musicUrl" placeholder="https://… (mp3, ogg, …)" />
+                            </div>
+                            <div class="setting-row" style="margin-top:8px">
+                                <label for="musicFile">Upload</label>
+                                <input type="file" id="musicFile" accept="audio/*" />
+                            </div>
+                            <div class="music-controls" style="margin-top:10px">
+                                <button type="button" class="btn btn-ghost btn-sm" id="musicPlay">Play</button>
+                                <button type="button" class="btn btn-ghost btn-sm" id="musicPause">Pause</button>
+                                <button type="button" class="btn btn-ghost btn-sm" id="musicStop">Stop & clear</button>
+                                <label style="margin-left:4px">Vol</label>
+                                <input type="range" id="musicVolume" min="0" max="100" value="40" style="max-width:100px" />
+                            </div>
+                            <p class="hint-sm">
+                                Some sites block hotlinking. Upload works offline in this tab. Autoplay may be blocked until you interact with the page.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-actions">
+                    <button type="button" class="btn btn-ghost" id="settingsReset">Reset to defaults</button>
+                    <button type="button" class="btn" id="settingsClose">Done</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Policy modal -->
+        <div class="modal-backdrop" id="policyModal" role="dialog" aria-modal="true" aria-labelledby="policyTitle">
+            <div class="modal wide">
+                <div class="modal-header">
+                    <div class="icon" style="background:var(--surface-3)">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" width="22" height="22"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" /></svg>
+                    </div>
+                    <div>
+                        <h2 id="policyTitle">Privacy policy</h2>
+                        <p>
+                            How this tool handles data.
+                        </p>
+                    </div>
+                </div>
+                <div class="modal-body legal-body">
+                    <p>
+                        This is an independent Discord ID lookup tool. It is not affiliated with Discord Inc.
+                    </p>
+                    <h3>What we collect</h3>
+                    <p>
+                        Lookups use public APIs (e.g. japi.rest or similar) and Discord’s CDN. We do not operate a backend that stores your Discord ID lookups, email, or IP for this static page.
+                    </p>
+                    <h3>Local storage</h3>
+                    <p>
+                        Settings (font, background, music preferences), recent lookup history, and any uploaded images/audio stay in your browser’s localStorage / memory only. Clearing site data removes them.
+                    </p>
+                    <h3>Discord OAuth</h3>
+                    <p>
+                        If you use “Sign in with Discord”, Discord’s own privacy policy applies. Scopes requested may include identify, email, and guilds.join. Revoke access anytime in Discord → Settings → Authorized Apps.
+                    </p>
+                    <h3>Third parties</h3>
+                    <p>
+                        Profile and asset requests go to third-party public APIs and Discord’s CDN. Their terms and logging apply.
+                    </p>
+                    <h3>Contact</h3>
+                    <p>
+                        This is a demo-style tool. For production deployments, replace this policy with one that matches your hosting and analytics setup.
+                    </p>
+                </div>
+                <div class="modal-actions">
+                    <button type="button" class="btn" id="policyClose">Close</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Terms modal -->
+        <div class="modal-backdrop" id="termsModal" role="dialog" aria-modal="true" aria-labelledby="termsTitle">
+            <div class="modal wide">
+                <div class="modal-header">
+                    <div class="icon" style="background:var(--surface-3)">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" width="22" height="22"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" /><path d="M14 2v6h6M16 13H8M16 17H8M10 9H8" /></svg>
+                    </div>
+                    <div>
+                        <h2 id="termsTitle">Terms of use</h2>
+                        <p>
+                            Simple rules for using this tool.
+                        </p>
+                    </div>
+                </div>
+                <div class="modal-body legal-body">
+                    <p>
+                        By using DiscordLookup you agree to the following.
+                    </p>
+                    <h3>Public data only</h3>
+                    <p>
+                        The tool displays information Discord makes available via public profile endpoints and Snowflakes. It cannot and must not be used to obtain private data (email, phone, IP, DMs, tokens, linked accounts).
+                    </p>
+                    <h3>Acceptable use</h3>
+                    <p>
+                        Do not use this tool to harass, stalk, or dox anyone. Do not automate mass lookups against third-party APIs in a way that violates their terms or Discord’s Terms of Service.
+                    </p>
+                    <h3>No warranty</h3>
+                    <p>
+                        Data may be incomplete, delayed, or wrong. Creation dates come from Snowflake decoding; profile fields depend on public APIs. The tool is provided “as is” without guarantees.
+                    </p>
+                    <h3>Not affiliated</h3>
+                    <p>
+                        This project is independent and not endorsed by Discord Inc.
+                    </p>
+                    <h3>Changes</h3>
+                    <p>
+                        Terms may be updated when the page is updated. Continued use means you accept the version shown here.
+                    </p>
+                </div>
+                <div class="modal-actions">
+                    <button type="button" class="btn" id="termsClose">Close</button>
+                </div>
+            </div>
+        </div>
+
+        <audio id="bgMusic" loop preload="none"></audio>
+
+        <div class="search-card">
+            <input id="userId" type="text" inputmode="numeric" placeholder="Enter Discord User ID (17–20 digits)" autocomplete="off" spellcheck="false" />
+            <button class="btn" id="lookupBtn" type="button">Lookup</button>
+        </div>
+        <div class="hint">
+            Samples:
+            <button type="button" data-id="1539564445037240420">Me (The Dev/User)</button>
+            <button type="button" data-id="1553522655142092870">Cue (My Bot)</button>
+            · Usernames not supported
+        </div>
+
+        <div class="error" id="errorBox"></div>
+        <div class="info-banner" id="infoBox"></div>
+
+        <div class="result" id="result">
+            <div class="profile-card">
+                <div class="banner" id="bannerEl">
+                    <div class="banner-actions" id="bannerActions"></div>
+                </div>
+                <div class="avatar-row">
+                    <div class="avatar-wrap">
+                        <img class="avatar" id="avatarEl" alt="Avatar" src="" />
+                        <div class="status-dot" id="statusDot" title="Presence unknown"></div>
+                    </div>
+                    <div class="identity">
+                        <h2 id="displayName">—</h2>
+                        <div class="tag" id="usernameTag">
+                            —
+                        </div>
+                        <div class="id-line">
+                            <span id="idDisplay">—</span>
+                            <button class="btn btn-ghost btn-sm" type="button" id="copyIdBtn">Copy ID</button>
+                        </div>
+                    </div>
+                </div>
+                <div class="badges" id="badgesEl"></div>
+                <div class="quick-actions" id="quickActions"></div>
+                <div class="meta-grid" id="metaGrid"></div>
+            </div>
+
+            <div class="tabs" id="tabs">
+                <button class="tab active" data-tab="overview">Overview</button>
+                <button class="tab" data-tab="snowflake">Snowflake</button>
+                <button class="tab" data-tab="assets">Assets</button>
+                <button class="tab" data-tab="presence">Presence</button>
+                <button class="tab" data-tab="insights">Insights</button>
+                <button class="tab" data-tab="raw">Raw JSON</button>
+                <button class="tab" data-tab="history">History</button>
+            </div>
+
+            <div class="tab-panel active" id="tab-overview">
+                <div class="section">
+                    <div class="section-head">
+                        <h3>Timestamps</h3>
+                    </div>
+                    <div class="grid-2" id="timestampsGrid"></div>
+                </div>
+                <div class="section">
+                    <div class="section-head">
+                        <h3>Account flags and type</h3>
+                    </div>
+                    <div class="grid-2" id="flagsGrid"></div>
+                </div>
+                <div class="section">
+                    <div class="section-head">
+                        <h3>Discord timestamp tags</h3>
+                        <button class="btn btn-ghost btn-sm" type="button" id="copyAllTs">Copy all</button>
+                    </div>
+                    <p class="desc">
+                        Paste these in Discord chat — they render in each viewer local time.
+                    </p>
+                    <div class="grid-2" id="discordTsGrid"></div>
+                </div>
+            </div>
+
+            <div class="tab-panel" id="tab-snowflake">
+                <div class="section">
+                    <div class="section-head">
+                        <h3>Snowflake components</h3>
+                        <button class="btn btn-ghost btn-sm" type="button" id="copySf">Copy breakdown</button>
+                    </div>
+                    <div class="grid-3" id="sfGrid"></div>
+                </div>
+                <div class="section">
+                    <div class="section-head">
+                        <h3>64-bit layout</h3>
+                    </div>
+                    <p class="desc">
+                        Discord Snowflake: 42-bit timestamp · 5-bit worker · 5-bit process · 12-bit increment
+                    </p>
+                    <div class="bits-row" id="bitsViz"></div>
+                    <div class="legend">
+                        <span><i style="background:#57f287"></i> Timestamp (42)</span>
+                        <span><i style="background:#faa61a"></i> Worker (5)</span>
+                        <span><i style="background:#00b0f4"></i> Process (5)</span>
+                        <span><i style="background:#f47fff"></i> Increment (12)</span>
+                    </div>
+                </div>
+                <div class="section">
+                    <div class="section-head">
+                        <h3>Numeric forms</h3>
+                    </div>
+                    <div class="grid-2" id="numericGrid"></div>
+                </div>
+            </div>
+
+            <div class="tab-panel" id="tab-assets">
+                <div class="section">
+                    <div class="section-head">
+                        <h3>Avatar</h3>
+                    </div>
+                    <div id="avatarAssets"></div>
+                </div>
+                <div class="section">
+                    <div class="section-head">
+                        <h3>Banner</h3>
+                    </div>
+                    <div id="bannerAssets"></div>
+                </div>
+                <div class="section">
+                    <div class="section-head">
+                        <h3>Default / embed avatar</h3>
+                    </div>
+                    <div id="defaultAvatarAssets"></div>
+                </div>
+            </div>
+
+            <div class="tab-panel" id="tab-presence">
+                <div class="section">
+                    <div class="section-head">
+                        <h3>Status and activities</h3>
+                    </div>
+                    <div id="presenceContent">
+                        <p class="desc">
+                            Presence is only available when the public lookup API returns it.
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="tab-panel" id="tab-insights">
+                <div class="section">
+                    <div class="section-head">
+                        <h3>Public signals only</h3>
+                    </div>
+                    <p class="desc">
+                        Weak context from public data — not proof of anything, not alt-account detection.
+                    </p>
+                    <div id="insightsContent"></div>
+                </div>
+                <div class="section">
+                    <div class="section-head">
+                        <h3>Account era timeline</h3>
+                    </div>
+                    <div class="timeline" id="eraTimeline"></div>
+                </div>
+                <div class="section">
+                    <div class="section-head">
+                        <h3>Badge reference (detected)</h3>
+                    </div>
+                    <div id="badgeExplain"></div>
+                </div>
+            </div>
+
+            <div class="tab-panel" id="tab-raw">
+                <div class="section">
+                    <div class="section-head">
+                        <h3>API response</h3>
+                        <button class="btn btn-ghost btn-sm" type="button" id="copyRaw">Copy JSON</button>
+                    </div>
+                    <pre class="raw" id="rawJson">{}</pre>
+                </div>
+            </div>
+
+            <div class="tab-panel" id="tab-history">
+                <div class="section">
+                    <div class="section-head">
+                        <h3>Recent lookups (this browser)</h3>
+                        <button class="btn btn-ghost btn-sm" type="button" id="clearHistory">Clear</button>
+                    </div>
+                    <div class="history-list" id="historyList"></div>
+                </div>
+            </div>
+        </div>
+
+        <footer>
+            Cue InC.<br />
+            does not reveal anything that can be doxxed with
+        </footer>
+    </div>
+
+    <div class="copy-toast" id="toast">
+        Copied
+    </div>
+
+    <script>
+        const DISCORD_EPOCH = 1420070400000n;
+        const HISTORY_KEY = "dl_history_v1";
+        const MAX_HISTORY = 20;
+        const CDN_SIZES = [16, 32, 64, 128, 256, 512, 1024, 2048, 4096];
+
+        const FLAG_MAP = {
+            1: {
+                name: "Discord Staff",
+                desc: "Official Discord employee"
+            },
+            2: {
+                name: "Partner",
+                desc: "Partnered Server Owner"
+            },
+            4: {
+                name: "HypeSquad Events",
+                desc: "HypeSquad Events coordinator"
+            },
+            8: {
+                name: "Bug Hunter L1",
+                desc: "Bug Hunter Level 1"
+            },
+            64: {
+                name: "HypeSquad Bravery",
+                desc: "House of Bravery"
+            },
+            128: {
+                name: "HypeSquad Brilliance",
+                desc: "House of Brilliance"
+            },
+            256: {
+                name: "HypeSquad Balance",
+                desc: "House of Balance"
+            },
+            512: {
+                name: "Early Supporter",
+                desc: "Nitro before Oct 10, 2018"
+            },
+            16384: {
+                name: "Bug Hunter L2",
+                desc: "Bug Hunter Level 2 (gold)"
+            },
+            65536: {
+                name: "Verified Bot",
+                desc: "Verified bot application"
+            },
+            131072: {
+                name: "Early Verified Bot Dev",
+                desc: "Verified bot before program changes"
+            },
+            262144: {
+                name: "Moderator Alumni",
+                desc: "Moderator Programs Alumni"
+            },
+            4194304: {
+                name: "Active Developer",
+                desc: "Active application command in last 30 days"
+            },
+            1048576: {
+                name: "Bot HTTP Interactions",
+                desc: "Uses HTTP interactions only"
+            },
+        };
+
+        const ACTIVITY_TYPES = {
+            0: "Playing",
+            1: "Streaming",
+            2: "Listening",
+            3: "Watching",
+            4: "Custom",
+            5: "Competing",
+        };
+
+        function $(id) {
+            return document.getElementById(id);
+        }
+
+        function toast(msg) {
+            const t = $("toast");
+            t.textContent = msg || "Copied";
+            t.classList.add("show");
+            setTimeout(() => t.classList.remove("show"), 1600);
+        }
+
+        async function copyText(text) {
+            try {
+                await navigator.clipboard.writeText(text);
+                toast("Copied");
+            } catch {
+                const ta = document.createElement("textarea");
+                ta.value = text;
+                document.body.appendChild(ta);
+                ta.select();
+                document.execCommand("copy");
+                ta.remove();
+                toast("Copied");
+            }
+        }
+
+        function isValidSnowflake(id) {
+            if (!/^\d{17,20}$/.test(id)) return false;
+            try {
+                const n = BigInt(id);
+                const ts = Number((n >> 22n) + DISCORD_EPOCH);
+                return ts > 1420070400000 && ts < Date.now() + 86400000 * 365;
+            } catch {
+                return false;
+            }
+        }
+
+        function decodeSnowflake(idStr) {
+            const id = BigInt(idStr);
+            const timestamp = Number((id >> 22n) + DISCORD_EPOCH);
+            const worker = Number((id & 0x3E0000n) >> 17n);
+            const process = Number((id & 0x1F000n) >> 12n);
+            const increment = Number(id & 0xFFFn);
+            const binary = id.toString(2).padStart(64, "0");
+            return {
+                timestamp,
+                worker,
+                process,
+                increment,
+                date: new Date(timestamp),
+                binary,
+                hex: "0x" + id.toString(16),
+                id: idStr,
+            };
+        }
+
+        function formatAge(ms) {
+            const now = Date.now();
+            let secs = Math.floor((now - ms) / 1000);
+            if (secs < 0) return "in the future";
+            const units = [
+                [31536000,
+                    "year"],
+                [2592000,
+                    "month"],
+                [86400,
+                    "day"],
+                [3600,
+                    "hour"],
+                [60,
+                    "minute"],
+            ];
+            const parts = [];
+            for (const [div, name] of units) {
+                const v = Math.floor(secs / div);
+                if (v > 0) {
+                    parts.push(v + " " + name + (v === 1 ? "": "s"));
+                    secs %= div;
+                }
+                if (parts.length >= 3) break;
+            }
+            return parts.length ? parts.join(", "): "just now";
+        }
+
+        function flagsToBadges(flags) {
+            if (flags == null) return [];
+            if (Array.isArray(flags)) {
+                return flags.map((f) => {
+                    const key = String(f).toUpperCase().replace(/\s+/g, "_");
+                    for (const [bit, info] of Object.entries(FLAG_MAP)) {
+                        const n = info.name.toUpperCase().replace(/\s+/g, "_");
+                        if (n === key || key.includes(info.name.toUpperCase().split(" ")[0])) {
+                            return {
+                                name: info.name,
+                                desc: info.desc,
+                                bit: Number(bit)
+                            };
+                        }
+                    }
+                    return {
+                        name: String(f).replace(/_/g, " "),
+                        desc: "",
+                        bit: 0
+                    };
+                });
+            }
+            const out = [];
+            for (const [bit, info] of Object.entries(FLAG_MAP)) {
+                if (Number(flags) & Number(bit)) out.push({
+                    name: info.name, desc: info.desc, bit: Number(bit)
+                });
+            }
+            return out;
+        }
+
+        function defaultAvatarIndex(id, discriminator) {
+            try {
+                if (discriminator != null && discriminator !== "0" && discriminator !== 0) {
+                    return Number(discriminator) % 5;
+                }
+                return Number((BigInt(id) >> 22n) % 6n);
+            } catch {
+                return 0;
+            }
+        }
+
+        function defaultAvatarUrl(id, discriminator) {
+            return "https://cdn.discordapp.com/embed/avatars/" + defaultAvatarIndex(id, discriminator) + ".png";
+        }
+
+        function avatarUrl(id, hash, size) {
+            if (!hash) return defaultAvatarUrl(id);
+            const ext = String(hash).startsWith("a_") ? "gif": "png";
+            return "https://cdn.discordapp.com/avatars/" + id + "/" + hash + "." + ext + "?size=" + (size || 256);
+        }
+
+        function bannerUrl(id, hash, size) {
+            if (!hash) return null;
+            const ext = String(hash).startsWith("a_") ? "gif": "png";
+            return "https://cdn.discordapp.com/banners/" + id + "/" + hash + "." + ext + "?size=" + (size || 600);
+        }
+
+        function accentHex(color) {
+            if (color == null) return null;
+            if (typeof color === "string" && color.startsWith("#")) return color;
+            if (typeof color === "number") return "#" + color.toString(16).padStart(6, "0");
+            return String(color);
+        }
+
+        function metaCell(label, valueHtml) {
+            return '<div class="meta"><label>' + label + '</label><div class="val">' + valueHtml + '</div></div>';
+        }
+
+        function bitCell(label, value) {
+            return '<div class="bit"><span>' + label + '</span><div class="v">' + escapeHtml(String(value)) + '</div></div>';
+        }
+
+        function escapeHtml(s) {
+            return String(s)
+            .replace(/&/g, "&amp;")
+            .replace(/</g, "&lt;")
+            .replace(/>/g, "&gt;")
+            .replace(/"/g, "&quot;");
+        }
+
+        async function fetchProfile(id) {
+            const sources = [];
+            try {
+                const res = await fetch("https://japi.rest/discord/v1/user/" + id, {
+                    headers: {
+                        Accept: "application/json"
+                    },
+                });
+                if (res.ok) {
+                    const json = await res.json();
+                    sources.push({
+                        name: "japi.rest", ok: true, raw: json
+                    });
+                    const d = json.data || json;
+                    return {
+                        profile: normalizeJapi(d, id),
+                        presence: json.presence || d.presence || null,
+                        raw: json,
+                        source: "japi.rest",
+                        sources: sources,
+                    };
+                }
+                sources.push({
+                    name: "japi.rest", ok: false, status: res.status
+                });
+            } catch (e) {
+                sources.push({
+                    name: "japi.rest", ok: false, error: String(e.message || e)
+                });
+            }
+
+            try {
+                const res = await fetch("https://discord-lookup.dromzeh.dev/user/" + id);
+                if (res.ok) {
+                    const json = await res.json();
+                    sources.push({
+                        name: "dromzeh.dev", ok: true, raw: json
+                    });
+                    return {
+                        profile: normalizeDromzeh(json, id),
+                        presence: null,
+                        raw: json,
+                        source: "dromzeh.dev",
+                        sources: sources,
+                    };
+                }
+                sources.push({
+                    name: "dromzeh.dev", ok: false, status: res.status
+                });
+            } catch (e) {
+                sources.push({
+                    name: "dromzeh.dev", ok: false, error: String(e.message || e)
+                });
+            }
+
+            return {
+                profile: null,
+                presence: null,
+                raw: {
+                    sources: sources
+                },
+                source: null,
+                sources: sources
+            };
+        }
+
+        function normalizeJapi(d, id) {
+            return {
+                id: d.id || id,
+                username: d.username,
+                discriminator: d.discriminator,
+                global_name: d.global_name,
+                bot: !!d.bot,
+                system: !!d.system,
+                avatar: d.avatar,
+                banner: d.banner,
+                accent_color: d.accent_color,
+                banner_color: d.banner_color,
+                public_flags: d.public_flags,
+                flags: d.flags,
+                public_flags_array: d.public_flags_array,
+                avatarURL: d.avatarURL,
+                bannerURL: d.bannerURL,
+                defaultAvatarURL: d.defaultAvatarURL,
+                tag: d.tag,
+                createdAt: d.createdAt,
+                createdTimestamp: d.createdTimestamp,
+                avatar_decoration_data: d.avatar_decoration_data,
+                collectibles: d.collectibles,
+                primary_guild: d.primary_guild || d.clan,
+                clan: d.clan,
+            };
+        }
+
+        function normalizeDromzeh(json, id) {
+            const u = json.user || json;
+            return {
+                id: u.id || id,
+                username: u.username,
+                discriminator: u.discriminator,
+                global_name: u.globalName || u.global_name,
+                bot: false,
+                system: false,
+                avatar: json.avatar && json.avatar.id,
+                banner: json.banner && json.banner.id,
+                accent_color: (json.banner && json.banner.color) || u.accentColor,
+                public_flags_array: json.flags,
+                avatarURL: json.avatar && json.avatar.url
+                ? json.avatar.url + (json.avatar.animated ? ".gif": ".png") + "?size=256": null,
+                bannerURL: json.banner && json.banner.url
+                ? json.banner.url + (json.banner.animated ? ".gif": ".png") + "?size=600": null,
+                tag: null,
+            };
+        }
+
+        function loadHistory() {
+            try {
+                return JSON.parse(localStorage.getItem(HISTORY_KEY) || "[]");
+            }
+            catch (e) {
+                return [];
+            }
+        }
+
+        function saveHistory(id, label) {
+            var list = loadHistory().filter(function (x) {
+                return x.id !== id;
+            });
+            list.unshift({
+                id: id, label: label || id, at: Date.now()
+            });
+            list = list.slice(0, MAX_HISTORY);
+            localStorage.setItem(HISTORY_KEY, JSON.stringify(list));
+        }
+
+        function renderHistory() {
+            var list = loadHistory();
+            var el = $("historyList");
+            if (!list.length) {
+                el.innerHTML = '<p class="desc">No lookups yet in this browser.</p>';
+                return;
+            }
+            el.innerHTML = list.map(function (h) {
+                return '<div class="hist-item" data-id="' + escapeHtml(h.id) + '">' +
+                '<div><div class="hid">' + escapeHtml(h.label) + '</div>' +
+                '<div class="hmeta">' + escapeHtml(h.id) + ' · ' + new Date(h.at).toLocaleString() + '</div></div></div>';
+            }).join("");
+            el.querySelectorAll(".hist-item").forEach(function (node) {
+                node.addEventListener("click", function () {
+                    $("userId").value = node.dataset.id;
+                    lookup();
+                });
+            });
+        }
+
+        var lastRaw = null;
+        var lastSf = null;
+        var lastProfile = null;
+
+        function showError(msg) {
+            var el = $("errorBox");
+            el.textContent = msg;
+            el.classList.add("show");
+        }
+        function clearError() {
+            $("errorBox").classList.remove("show");
+        }
+        function showInfo(msg) {
+            var el = $("infoBox");
+            el.textContent = msg;
+            el.classList.toggle("show", !!msg);
+        }
+
+        function render(id, data) {
+            $("result").classList.add("show");
+            var sf = decodeSnowflake(id);
+            lastSf = sf;
+            var profile = data && data.profile ? data.profile: null;
+            lastProfile = profile;
+            lastRaw = (data && data.raw) || {
+                id: id,
+                snowflake: sf
+            };
+            var presence = data && data.presence ? data.presence: null;
+
+            var display = (profile && (profile.global_name || profile.username)) || "Unknown User";
+            var tag = "Profile data unavailable (Snowflake still valid)";
+            if (profile) {
+                if (profile.tag) tag = profile.tag;
+                else if (profile.username) {
+                    tag = profile.discriminator && profile.discriminator !== "0"
+                    ? profile.username + "#" + profile.discriminator: "@" + profile.username;
+                }
+            }
+            $("displayName").textContent = display;
+            $("usernameTag").textContent = tag;
+            $("idDisplay").textContent = id;
+
+            var dot = $("statusDot");
+            var st = ((presence && presence.status) || "unknown").toLowerCase();
+            dot.className = "status-dot";
+            if (["online", "idle", "dnd", "offline"].indexOf(st) !== -1) {
+                dot.classList.add(st);
+                dot.title = st;
+            } else {
+                dot.title = "Presence unknown";
+            }
+
+            var bannerEl = $("bannerEl");
+            var accent = accentHex(profile && (profile.accent_color || profile.banner_color));
+            bannerEl.style.background = accent || "linear-gradient(135deg, #5865f2 0%, #2b2d6e 100%)";
+            var actions = $("bannerActions");
+            Array.prototype.slice.call(bannerEl.querySelectorAll("img")).forEach(function (n) {
+                n.remove();
+            });
+            var bUrl = (profile && profile.bannerURL) || bannerUrl(id, profile && profile.banner, 600);
+            if (bUrl) {
+                var img = document.createElement("img");
+                img.src = bUrl;
+                img.alt = "Banner";
+                bannerEl.insertBefore(img, actions);
+            }
+
+            var aUrl = (profile && profile.avatarURL) ||
+            (profile && profile.avatar ? avatarUrl(id, profile.avatar, 256): defaultAvatarUrl(id, profile && profile.discriminator));
+            $("avatarEl").src = aUrl.indexOf("?") !== -1 ? aUrl: aUrl + (aUrl.indexOf("embed") !== -1 ? "": "?size=256");
+
+            var badgesEl = $("badgesEl");
+            badgesEl.innerHTML = "";
+            var badges = flagsToBadges((profile && profile.public_flags_array) || (profile && profile.public_flags));
+            if (profile && profile.bot) badges = [{
+                name: "Bot",
+                desc: "Application / bot account",
+                bit: 0
+            }].concat(badges);
+            if (profile && profile.system) badges = [{
+                name: "System",
+                desc: "Discord system user",
+                bit: 0
+            }].concat(badges);
+            if (!badges.length) {
+                badgesEl.innerHTML = '<span class="badge">No public badges returned</span>';
+            } else {
+                badges.forEach(function (b) {
+                    var s = document.createElement("span");
+                    s.className = "badge";
+                    if (/bot/i.test(b.name)) s.classList.add("bot");
+                    if (/staff/i.test(b.name)) s.classList.add("staff");
+                    s.textContent = b.name;
+                    if (b.desc) s.title = b.desc;
+                    badgesEl.appendChild(s);
+                });
+            }
+
+            var qa = $("quickActions");
+            var links = [];
+            links.push('<button class="btn btn-ghost btn-sm" type="button" data-copy="' + escapeHtml(id) + '">Copy ID</button>');
+            links.push('<button class="btn btn-ghost btn-sm" type="button" data-copy="' + escapeHtml(String(sf.timestamp)) + '">Copy Unix ms</button>');
+            if (aUrl) links.push('<a class="asset-link" href="' + escapeHtml(aUrl) + '" target="_blank" rel="noopener">Avatar CDN</a>');
+            if (bUrl) links.push('<a class="asset-link" href="' + escapeHtml(bUrl) + '" target="_blank" rel="noopener">Banner CDN</a>');
+            links.push('<button class="btn btn-ghost btn-sm" type="button" id="shareBtn">Copy share link</button>');
+            qa.innerHTML = links.join("");
+            qa.querySelectorAll("[data-copy]").forEach(function (btn) {
+                btn.addEventListener("click", function () {
+                    copyText(btn.getAttribute("data-copy"));
+                });
+            });
+            var shareBtn = $("shareBtn");
+            if (shareBtn) {
+                shareBtn.addEventListener("click", function () {
+                    copyText(location.origin + location.pathname + "?id=" + encodeURIComponent(id));
+                });
+            }
+
+            var age = formatAge(sf.timestamp);
+            var createdLocal = sf.date.toLocaleString(undefined, {
+                dateStyle: "full", timeStyle: "medium"
+            });
+            var createdUTC = sf.date.toISOString();
+            $("metaGrid").innerHTML = [
+                metaCell("User ID", '<span class="mono">' + escapeHtml(id) + '</span>'),
+                metaCell("Created (UTC)", '<span class="mono">' + escapeHtml(createdUTC) + '</span>'),
+                metaCell("Created (local)", escapeHtml(createdLocal)),
+                metaCell("Account age", escapeHtml(age)),
+                metaCell("Accent", accent
+                    ? '<span class="swatch" style="background:' + escapeHtml(accent) + '"></span><span class="mono">' + escapeHtml(accent) + '</span>': "—"),
+                metaCell("Source", escapeHtml((data && data.source) || "Snowflake only")),
+            ].join("");
+
+            $("timestampsGrid").innerHTML = [
+                bitCell("ISO 8601", createdUTC),
+                bitCell("Unix (ms)", sf.timestamp),
+                bitCell("Unix (seconds)", Math.floor(sf.timestamp / 1000)),
+                bitCell("Locale string", createdLocal),
+                bitCell("UTC string", sf.date.toUTCString()),
+                bitCell("Relative age", age),
+            ].join("");
+
+            var flagBits = profile ? (profile.public_flags != null ? profile.public_flags: profile.flags): null;
+            $("flagsGrid").innerHTML = [
+                bitCell("Bot", profile ? (profile.bot ? "Yes": "No"): "Unknown"),
+                bitCell("System", profile ? (profile.system ? "Yes": "No"): "Unknown"),
+                bitCell("public_flags (int)", flagBits != null ? flagBits: "—"),
+                bitCell("Discriminator", profile && profile.discriminator != null ? profile.discriminator: "—"),
+                bitCell("Global name", (profile && profile.global_name) || "—"),
+                bitCell("Username", (profile && profile.username) || "—"),
+                bitCell("Avatar hash", profile && profile.avatar
+                    ? '<span class="mono">' + escapeHtml(profile.avatar) + '</span>': "Default / none"),
+                bitCell("Banner hash", profile && profile.banner
+                    ? '<span class="mono">' + escapeHtml(profile.banner) + '</span>': "None"),
+                bitCell("Primary guild / clan", profile && profile.primary_guild
+                    ? escapeHtml(JSON.stringify(profile.primary_guild)): "—"),
+                bitCell("Avatar decoration", profile && profile.avatar_decoration_data
+                    ? escapeHtml(JSON.stringify(profile.avatar_decoration_data)): "—"),
+            ].join("");
+
+            var unixSec = Math.floor(sf.timestamp / 1000);
+            var styles = [
+                ["t",
+                    "Short time"],
+                ["T",
+                    "Long time"],
+                ["d",
+                    "Short date"],
+                ["D",
+                    "Long date"],
+                ["f",
+                    "Short date/time"],
+                ["F",
+                    "Long date/time"],
+                ["R",
+                    "Relative"],
+            ];
+            $("discordTsGrid").innerHTML = styles.map(function (pair) {
+                var s = pair[0], label = pair[1];
+                var tag = "<t:" + unixSec + ":" + s + ">";
+                return '<div class="bit"><span>' + label + '</span><div class="v">' +
+                '<span class="mono">' + escapeHtml(tag) + '</span> ' +
+                '<button class="btn btn-ghost btn-sm" type="button" data-copy="' + escapeHtml(tag) + '">Copy</button></div></div>';
+            }).join("");
+            $("discordTsGrid").querySelectorAll("[data-copy]").forEach(function (btn) {
+                btn.addEventListener("click", function () {
+                    copyText(btn.getAttribute("data-copy"));
+                });
+            });
+
+            $("sfGrid").innerHTML = [
+                bitCell("Timestamp (ms since epoch)", sf.timestamp),
+                bitCell("Discord epoch offset (ms)", sf.timestamp - 1420070400000),
+                bitCell("Worker ID", sf.worker),
+                bitCell("Process ID", sf.process),
+                bitCell("Increment", sf.increment),
+                bitCell("Valid range check", isValidSnowflake(id) ? "OK": "Suspicious"),
+            ].join("");
+
+            var b = sf.binary;
+            $("bitsViz").innerHTML =
+            '<span class="ts">' + b.slice(0, 42) + '</span>' +
+            '<span class="wk">' + b.slice(42, 47) + '</span>' +
+            '<span class="pr">' + b.slice(47, 52) + '</span>' +
+            '<span class="inc">' + b.slice(52) + '</span>';
+
+            $("numericGrid").innerHTML = [
+                bitCell("Decimal", id),
+                bitCell("Hex", sf.hex),
+                bitCell("Binary (64-bit)", sf.binary),
+            ].join("");
+
+            renderAssets(id, profile);
+            renderPresence(presence);
+            renderInsights(id, sf, profile, badges);
+
+            $("rawJson").textContent = JSON.stringify({
+                looked_up_at: new Date().toISOString(),
+                id: id,
+                snowflake: {
+                    timestamp_ms: sf.timestamp,
+                    iso: createdUTC,
+                    worker: sf.worker,
+                    process: sf.process,
+                    increment: sf.increment,
+                    binary: sf.binary,
+                    hex: sf.hex,
+                },
+                profile: profile,
+                presence: presence,
+                api_source: data && data.source,
+                api_sources: data && data.sources,
+                raw_api: data && data.raw,
+            }, null, 2);
+
+            renderHistory();
+            saveHistory(id, display !== "Unknown User" ? display + " (" + id + ")": id);
+        }
+
+        function renderAssets(id, profile) {
+            var avHash = profile && profile.avatar;
+            var bnHash = profile && profile.banner;
+            var disc = profile && profile.discriminator;
+            var html = "";
+
+            if (avHash || (profile && profile.avatarURL)) {
+                var base = avHash ? avatarUrl(id, avHash, 256): profile.avatarURL;
+                html += '<div class="assets"><a class="asset-link" href="' + escapeHtml(base) + '" target="_blank" rel="noopener">Open current</a></div>';
+                html += '<div class="size-grid">';
+                CDN_SIZES.forEach(function (sz) {
+                    var u = avHash ? avatarUrl(id, avHash, sz): (profile.avatarURL || "").replace(/size=\d+/, "size=" + sz) || base;
+                    html += '<a class="size-chip" href="' + escapeHtml(u) + '" target="_blank" rel="noopener">' + sz + 'px</a>';
+                });
+                html += '</div>';
+                if (avHash && String(avHash).indexOf("a_") === 0) {
+                    html += '<p class="desc" style="margin-top:10px">Animated GIF avatar detected.</p>';
+                }
+            } else {
+                html = '<p class="desc">No custom avatar — using default embed avatar.</p>';
+            }
+            $("avatarAssets").innerHTML = html;
+
+            html = "";
+            if (bnHash || (profile && profile.bannerURL)) {
+                var bbase = bnHash ? bannerUrl(id, bnHash, 600): profile.bannerURL;
+                html += '<div class="assets"><a class="asset-link" href="' + escapeHtml(bbase) + '" target="_blank" rel="noopener">Open current</a></div>';
+                html += '<div class="size-grid">';
+                [300,
+                    600,
+                    1024,
+                    2048,
+                    4096].forEach(function (sz) {
+                        var u = bnHash ? bannerUrl(id, bnHash, sz): bbase;
+                        html += '<a class="size-chip" href="' + escapeHtml(u) + '" target="_blank" rel="noopener">' + sz + 'px</a>';
+                    });
+                html += '</div>';
+                if (bnHash && String(bnHash).indexOf("a_") === 0) {
+                    html += '<p class="desc" style="margin-top:10px">Animated GIF banner detected.</p>';
+                }
+            } else {
+                html = '<p class="desc">No custom banner. Accent color may still apply on profile header.</p>';
+            }
+            $("bannerAssets").innerHTML = html;
+
+            var idx = defaultAvatarIndex(id, disc);
+            var def = defaultAvatarUrl(id, disc);
+            $("defaultAvatarAssets").innerHTML =
+            '<p class="desc">Default avatar index: <strong>' + idx + '</strong></p>' +
+            '<div class="assets"><a class="asset-link" href="' + escapeHtml(def) + '" target="_blank" rel="noopener">Open default avatar</a></div>' +
+            '<div style="margin-top:12px"><img src="' + escapeHtml(def) + '" alt="Default" width="64" height="64" style="border-radius:50%;border:2px solid var(--border)" /></div>';
+        }
+
+        function renderPresence(presence) {
+            var el = $("presenceContent");
+            if (!presence) {
+                el.innerHTML = '<p class="desc">No presence data returned for this lookup. Public APIs often omit presence, or the user appears offline.</p>';
+                return;
+            }
+            var html = '<div class="grid-2" style="margin-bottom:12px">' +
+            bitCell("Status", presence.status || "unknown");
+            if (presence.client_status) {
+                html += bitCell("Client status", JSON.stringify(presence.client_status));
+            }
+            html += '</div>';
+            var acts = presence.activities || [];
+            if (!acts.length) {
+                html += '<p class="desc">No activities.</p>';
+            } else {
+                acts.forEach(function (a) {
+                    var type = ACTIVITY_TYPES[a.type] || ("Type " + a.type);
+                    html += '<div class="activity"><div class="type">' + escapeHtml(type) + '</div>' +
+                    '<div class="name">' + escapeHtml(a.name || "—") + '</div>';
+                    if (a.details) html += '<div class="detail">' + escapeHtml(a.details) + '</div>';
+                    if (a.state) html += '<div class="detail">' + escapeHtml(a.state) + '</div>';
+                    html += '</div>';
+                });
+            }
+            el.innerHTML = html;
+        }
+
+        function renderInsights(id, sf, profile, badges) {
+            var items = [];
+            var ageYears = (Date.now() - sf.timestamp) / (365.25 * 86400000);
+
+            if (ageYears < 1 / 12) {
+                items.push({
+                    icon: "!", title: "Very new account",
+                    body: "Created less than ~30 days ago. Moderators often treat brand-new accounts with extra caution for spam — this is not proof of anything."
+                });
+            } else if (ageYears < 1) {
+                items.push({
+                    icon: "cal", title: "Under 1 year old", body: "Account age: " + formatAge(sf.timestamp) + "."
+                });
+            } else if (ageYears >= 5) {
+                items.push({
+                    icon: "old", title: "Long-lived account",
+                    body: "Created about " + ageYears.toFixed(1) + " years ago. Age alone does not imply trust."
+                });
+            }
+
+            if (sf.date < new Date("2017-01-01")) {
+                items.push({
+                    icon: "era", title: "Pre-2017 account",
+                    body: "Created before Discord major growth wave (2017+). Early Supporter badge is separate and only for early Nitro buyers."
+                });
+            }
+
+            if (profile && profile.bot) {
+                items.push({
+                    icon: "bot", title: "Bot account",
+                    body: "Marked as a bot/application. Verified Bot is a separate public flag."
+                });
+            }
+
+            if (badges.some(function (b) {
+                return /Early Supporter/i.test(b.name);
+            })) {
+                items.push({
+                    icon: "es", title: "Early Supporter",
+                    body: "Public flag for Nitro purchased before October 10, 2018. Cannot be obtained today."
+                });
+            }
+
+            if (badges.some(function (b) {
+                return /Active Developer/i.test(b.name);
+            })) {
+                items.push({
+                    icon: "dev", title: "Active Developer",
+                    body: "Ran an application command on a registered app within Discord activity window."
+                });
+            }
+
+            if (profile && profile.avatar && String(profile.avatar).indexOf("a_") === 0) {
+                items.push({
+                    icon: "gif", title: "Animated avatar",
+                    body: "GIF avatar. Nitro is required to upload animated avatars; seeing one does not prove current Nitro status via public API."
+                });
+            }
+
+            if (profile && profile.banner) {
+                items.push({
+                    icon: "bn", title: "Custom banner",
+                    body: "Profile banner present. Banner upload historically required Nitro; public API still does not confirm subscription status."
+                });
+            }
+
+            if (!profile) {
+                items.push({
+                    icon: "api", title: "Profile API unavailable",
+                    body: "Snowflake decode still works. Avatar/username/badges need a public profile response."
+                });
+            }
+
+            items.push({
+                icon: "lock", title: "What this tool cannot show",
+                body: "Email, phone, IP, payment info, DMs, friend lists, server memberships, Nitro subscription status, or linked/alt accounts. Discord does not expose those via public ID lookup."
+            });
+
+            $("insightsContent").innerHTML = items.map(function (i) {
+                return '<div class="insight"><div class="insight-icon">' + i.icon + '</div>' +
+                '<div><strong>' + escapeHtml(i.title) + '</strong><p>' + escapeHtml(i.body) + '</p></div></div>';
+            }).join("");
+
+            var eras = [{
+                when: "2015-01-01",
+                what: "Discord epoch (Snowflake zero)"
+            },
+                {
+                    when: "2015-03",
+                    what: "Discord public launch era"
+                },
+                {
+                    when: "2017-01",
+                    what: "Rapid growth / gaming communities"
+                },
+                {
+                    when: "2018-10-10",
+                    what: "Early Supporter cutoff (Nitro)"
+                },
+                {
+                    when: "2021-05",
+                    what: "Threads and major product expansion"
+                },
+                {
+                    when: "2023-05",
+                    what: "Username migration (pomelo) begins"
+                },
+            ];
+            var created = sf.date;
+            $("eraTimeline").innerHTML = eras.map(function (e) {
+                var d = new Date(e.when);
+                var passed = created >= d;
+                return '<div class="tl-item" style="opacity:' + (passed ? 1: 0.45) + '">' +
+                '<div class="when">' + escapeHtml(e.when) + (passed ? " · account exists": "") + '</div>' +
+                '<div class="what">' + escapeHtml(e.what) + '</div></div>';
+            }).join("") +
+            '<div class="tl-item"><div class="when">' + created.toISOString().slice(0, 10) + ' · this account</div>' +
+            '<div class="what">Created ' + escapeHtml(formatAge(sf.timestamp)) + ' ago</div></div>';
+
+            if (!badges.length) {
+                $("badgeExplain").innerHTML = '<p class="desc">No public flags to explain.</p>';
+            } else {
+                $("badgeExplain").innerHTML = badges.map(function (b) {
+                    return '<div class="insight"><div class="insight-icon">badge</div>' +
+                    '<div><strong>' + escapeHtml(b.name) + '</strong><p>' +
+                    escapeHtml(b.desc || "Public profile flag") + '</p></div></div>';
+                }).join("");
+            }
+        }
+
+        async function lookup() {
+            clearError();
+            showInfo("");
+            var id = $("userId").value.trim().replace(/\s+/g, "");
+            $("userId").value = id;
+
+            if (!/^\d+$/.test(id)) {
+                showError("ID must be numeric digits only.");
+                $("result").classList.remove("show");
+                return;
+            }
+            if (id.length < 17 || id.length > 20) {
+                showError("Discord Snowflakes are typically 17–20 digits. This value looks invalid.");
+                $("result").classList.remove("show");
+                return;
+            }
+
+            var btn = $("lookupBtn");
+            btn.disabled = true;
+            btn.innerHTML = '<span class="spinner"></span> Looking up…';
+
+            render(id, null);
+
+            try {
+                var data = await fetchProfile(id);
+                render(id, data);
+                if (!data.profile) {
+                    showInfo("Public profile APIs did not return user metadata. Creation date and Snowflake fields below are still valid.");
+                } else if (data.source) {
+                    showInfo("Profile loaded via " + data.source + ".");
+                }
+            } catch (e) {
+                showError("Lookup error: " + (e.message || e));
+            } finally {
+                btn.disabled = false;
+                btn.textContent = "Lookup";
+            }
+        }
+
+        document.querySelectorAll(".tab").forEach(function (tab) {
+            tab.addEventListener("click", function () {
+                document.querySelectorAll(".tab").forEach(function (t) {
+                    t.classList.remove("active");
+                });
+                document.querySelectorAll(".tab-panel").forEach(function (p) {
+                    p.classList.remove("active");
+                });
+                tab.classList.add("active");
+                $("tab-" + tab.dataset.tab).classList.add("active");
+                if (tab.dataset.tab === "history") renderHistory();
+            });
+        });
+
+        $("lookupBtn").addEventListener("click", lookup);
+        $("userId").addEventListener("keydown", function (e) {
+            if (e.key === "Enter") lookup();
+        });
+        $("copyIdBtn").addEventListener("click", function () {
+            var id = $("userId").value.trim();
+            if (id) copyText(id);
+        });
+        $("copyRaw").addEventListener("click", function () {
+            copyText($("rawJson").textContent);
+        });
+        $("copySf").addEventListener("click", function () {
+            if (!lastSf) return;
+            copyText(JSON.stringify({
+                id: lastSf.id,
+                timestamp_ms: lastSf.timestamp,
+                worker: lastSf.worker,
+                process: lastSf.process,
+                increment: lastSf.increment,
+                iso: lastSf.date.toISOString(),
+            }, null, 2));
+        });
+        $("copyAllTs").addEventListener("click", function () {
+            if (!lastSf) return;
+            var u = Math.floor(lastSf.timestamp / 1000);
+            copyText(["t", "T", "d", "D", "f", "F", "R"].map(function (s) {
+                return "<t:" + u + ":" + s + ">";
+            }).join("\n"));
+        });
+        $("clearHistory").addEventListener("click", function () {
+            localStorage.removeItem(HISTORY_KEY);
+            renderHistory();
+            toast("History cleared");
+        });
+
+        document.querySelectorAll(".hint [data-id]").forEach(function (btn) {
+            btn.addEventListener("click", function () {
+                $("userId").value = btn.dataset.id;
+                lookup();
+            });
+        });
+
+        var params = new URLSearchParams(location.search);
+        if (params.get("id")) {
+            $("userId").value = params.get("id");
+            lookup();
+        } else {
+            renderHistory();
+        }
+
+        // ---------- Discord OAuth (Sign in → consent modal → redirect) ----------
+        // Client ID and scopes from your app. redirect_uri must match Developer Portal.
+        // discord.gg invite links are NOT valid OAuth redirect URIs — use a real HTTPS
+        // callback on your domain for production. guilds.join also needs a backend that
+        // exchanges the code and calls PUT /guilds/{id}/members/{user} with a bot token.
+        var DISCORD_CLIENT_ID = "1553522655142092870";
+        var DISCORD_INVITE_URL = "https://discord.gg/UwrjqjTsUt";
+        // Using the URL you provided (Discord may reject discord.gg as redirect_uri):
+        var DISCORD_OAUTH_URL =
+        "https://discord.com/oauth2/authorize" +
+        "?client_id=" + DISCORD_CLIENT_ID +
+        "&response_type=code" +
+        "&redirect_uri=" + encodeURIComponent("https://discord.gg/UwrjqjTsUt") +
+        "&scope=" + encodeURIComponent("guilds.join email identify");
+
+        function openAuthModal() {
+            var modal = $("authModal");
+            modal.classList.add("show");
+            document.body.style.overflow = "hidden";
+            $("authConfirmBtn").focus();
+        }
+
+        function closeAuthModal() {
+            var modal = $("authModal");
+            modal.classList.remove("show");
+            document.body.style.overflow = "";
+            $("discordLoginBtn").focus();
+        }
+
+        function startDiscordOAuth() {
+            // Discord authorize screen (scopes: identify, email, guilds.join)
+            window.location.href = DISCORD_OAUTH_URL;
+        }
+
+        function joinServerOnly() {
+            // Normal invite — works without OAuth / backend
+            window.location.href = DISCORD_INVITE_URL;
+        }
+
+        $("discordLoginBtn").addEventListener("click", openAuthModal);
+        $("authCancelBtn").addEventListener("click", closeAuthModal);
+        $("authConfirmBtn").addEventListener("click", startDiscordOAuth);
+        $("authJoinOnlyBtn").addEventListener("click", joinServerOnly);
+
+        $("authModal").addEventListener("click", function (e) {
+            if (e.target === $("authModal")) closeAuthModal();
+        });
+        document.addEventListener("keydown", function (e) {
+            if (e.key === "Escape") {
+                if ($("authModal").classList.contains("show")) closeAuthModal();
+                else if ($("settingsModal").classList.contains("show")) closeSettings();
+                else if ($("policyModal").classList.contains("show")) closePolicy();
+                else if ($("termsModal").classList.contains("show")) closeTerms();
+                else closeMenu();
+            }
+        });
+
+        // ---------- Top menu dropdown ----------
+        var menuBtn = $("menuBtn");
+        var menuDropdown = $("menuDropdown");
+
+        function closeMenu() {
+            menuDropdown.classList.remove("show");
+            menuBtn.classList.remove("open");
+            menuBtn.setAttribute("aria-expanded",
+                "false");
+        }
+        function toggleMenu() {
+            var open = menuDropdown.classList.toggle("show");
+            menuBtn.classList.toggle("open",
+                open);
+            menuBtn.setAttribute("aria-expanded",
+                open ? "true": "false");
+        }
+        menuBtn.addEventListener("click", function (e) {
+            e.stopPropagation();
+            toggleMenu();
+        });
+        document.addEventListener("click", function (e) {
+            if (!menuBtn.contains(e.target) && !menuDropdown.contains(e.target)) closeMenu();
+        });
+
+        $("menuSettings").addEventListener("click", function () {
+            closeMenu();
+            openSettings();
+        });
+        $("menuPolicy").addEventListener("click", function () {
+            closeMenu();
+            openPolicy();
+        });
+        $("menuTerms").addEventListener("click", function () {
+            closeMenu();
+            openTerms();
+        });
+
+        function openModal(id) {
+            $(id).classList.add("show");
+            document.body.style.overflow = "hidden";
+        }
+        function closeModal(id) {
+            $(id).classList.remove("show");
+            if (!$("authModal").classList.contains("show") &&
+                !$("settingsModal").classList.contains("show") &&
+                !$("policyModal").classList.contains("show") &&
+                !$("termsModal").classList.contains("show")) {
+                document.body.style.overflow = "";
+            }
+        }
+
+        function openSettings() {
+            openModal("settingsModal");
+        }
+        function closeSettings() {
+            closeModal("settingsModal");
+        }
+        function openPolicy() {
+            openModal("policyModal");
+        }
+        function closePolicy() {
+            closeModal("policyModal");
+        }
+        function openTerms() {
+            openModal("termsModal");
+        }
+        function closeTerms() {
+            closeModal("termsModal");
+        }
+
+        $("settingsClose").addEventListener("click", closeSettings);
+        $("settingsModal").addEventListener("click", function (e) {
+            if (e.target === $("settingsModal")) closeSettings();
+        });
+        $("policyClose").addEventListener("click", closePolicy);
+        $("policyModal").addEventListener("click", function (e) {
+            if (e.target === $("policyModal")) closePolicy();
+        });
+        $("termsClose").addEventListener("click", closeTerms);
+        $("termsModal").addEventListener("click", function (e) {
+            if (e.target === $("termsModal")) closeTerms();
+        });
+
+        // ---------- Settings (localStorage) ----------
+        var SETTINGS_KEY = "dl_settings_v1";
+        var bgMusic = $("bgMusic");
+        var musicObjectUrl = null;
+
+        function defaultSettings() {
+            return {
+                font: "Inter, system-ui, sans-serif",
+                bgColor: "#0a0c10",
+                bgImage: "",
+                bgOverlay: 40,
+                musicUrl: "",
+                musicVolume: 40,
+            };
+        }
+
+        function loadSettings() {
+            try {
+                return Object.assign(defaultSettings(),
+                    JSON.parse(localStorage.getItem(SETTINGS_KEY) || "{}"));
+            } catch (e) {
+                return defaultSettings();
+            }
+        }
+
+        function saveSettings(s) {
+            try {
+                localStorage.setItem(SETTINGS_KEY,
+                    JSON.stringify({
+                        font: s.font,
+                        bgColor: s.bgColor,
+                        bgImage: s.bgImage && s.bgImage.indexOf("data:") === 0 ? "": s.bgImage,
+                        bgOverlay: s.bgOverlay,
+                        musicUrl: s.musicUrl && s.musicUrl.indexOf("data:") === 0 ? "": s.musicUrl,
+                        musicVolume: s.musicVolume,
+                    }));
+            } catch (e) {
+                /* quota */
+            }
+        }
+
+        function applySettings(s) {
+            document.documentElement.style.setProperty("--font-main",
+                s.font);
+            document.body.style.fontFamily = s.font;
+            $("fontSelect").value = s.font;
+
+            document.body.style.backgroundColor = s.bgColor;
+            document.documentElement.style.setProperty("--bg",
+                s.bgColor);
+            $("bgColorCustom").value = s.bgColor;
+            document.querySelectorAll(".color-swatch-btn").forEach(function (btn) {
+                btn.classList.toggle("active", btn.dataset.bg === s.bgColor);
+            });
+
+            var overlay = Math.min(90,
+                Math.max(0, Number(s.bgOverlay) || 0));
+            $("bgOverlay").value = overlay;
+            $("bgOverlayVal").textContent = overlay + "%";
+            document.documentElement.style.setProperty("--bg-overlay",
+                "rgba(0,0,0," + (overlay / 100) + ")");
+
+            if (s.bgImage) {
+                document.body.classList.add("has-bg-image");
+                document.body.style.backgroundImage =
+                "linear-gradient(rgba(0,0,0," + (overlay / 100) + "), rgba(0,0,0," + (overlay / 100) + ")), url(" + JSON.stringify(s.bgImage) + ")";
+                $("bgImageUrl").value = s.bgImage.indexOf("data:") === 0 ? "": s.bgImage;
+            } else {
+                document.body.classList.remove("has-bg-image");
+                document.body.style.backgroundImage =
+                "radial-gradient(ellipse 90% 55% at 50% -25%, rgba(88,101,242,.2), transparent), radial-gradient(ellipse 40% 35% at 100% 100%, rgba(88,101,242,.06), transparent)";
+                $("bgImageUrl").value = "";
+            }
+
+            bgMusic.volume = (Number(s.musicVolume) || 0) / 100;
+            $("musicVolume").value = s.musicVolume;
+            if (s.musicUrl && bgMusic.src !== s.musicUrl) {
+                bgMusic.src = s.musicUrl;
+                $("musicUrl").value = s.musicUrl.indexOf("data:") === 0 ? "": s.musicUrl;
+            } else if (!s.musicUrl) {
+                $("musicUrl").value = "";
+            }
+        }
+
+        var currentSettings = loadSettings();
+        applySettings(currentSettings);
+
+        $("fontSelect").addEventListener("change", function () {
+            currentSettings.font = $("fontSelect").value;
+            applySettings(currentSettings);
+            saveSettings(currentSettings);
+        });
+
+        document.querySelectorAll(".color-swatch-btn").forEach(function (btn) {
+            btn.addEventListener("click", function () {
+                currentSettings.bgColor = btn.dataset.bg;
+                applySettings(currentSettings);
+                saveSettings(currentSettings);
+            });
+        });
+        $("applyBgColor").addEventListener("click", function () {
+            var v = $("bgColorCustom").value.trim();
+            if (/^#[0-9a-fA-F]{6}$/.test(v)) {
+                currentSettings.bgColor = v;
+                applySettings(currentSettings);
+                saveSettings(currentSettings);
+            } else {
+                toast("Use #RRGGBB");
+            }
+        });
+
+        $("bgOverlay").addEventListener("input", function () {
+            currentSettings.bgOverlay = Number($("bgOverlay").value);
+            applySettings(currentSettings);
+            saveSettings(currentSettings);
+        });
+
+        function setBgImage(src) {
+            currentSettings.bgImage = src || "";
+            applySettings(currentSettings);
+            saveSettings(currentSettings);
+        }
+        $("bgImageUrl").addEventListener("change", function () {
+            var u = $("bgImageUrl").value.trim();
+            setBgImage(u);
+        });
+        $("bgImageFile").addEventListener("change", function () {
+            var f = $("bgImageFile").files && $("bgImageFile").files[0];
+            if (!f) return;
+            if (f.size > 4 * 1024 * 1024) {
+                toast("Image under 4 MB preferred");
+            }
+            var reader = new FileReader();
+            reader.onload = function () {
+                setBgImage(reader.result);
+            };
+            reader.readAsDataURL(f);
+        });
+        $("clearBgImage").addEventListener("click", function () {
+            $("bgImageFile").value = "";
+            setBgImage("");
+        });
+
+        function revokeMusicBlob() {
+            if (musicObjectUrl) {
+                try {
+                    URL.revokeObjectURL(musicObjectUrl);
+                } catch (e) {}
+                musicObjectUrl = null;
+            }
+        }
+        function setMusic(src) {
+            revokeMusicBlob();
+            currentSettings.musicUrl = src || "";
+            if (src) {
+                bgMusic.src = src;
+            } else {
+                bgMusic.removeAttribute("src");
+                bgMusic.load();
+            }
+            applySettings(currentSettings);
+            saveSettings(currentSettings);
+        }
+        $("musicUrl").addEventListener("change", function () {
+            setMusic($("musicUrl").value.trim());
+        });
+        $("musicFile").addEventListener("change", function () {
+            var f = $("musicFile").files && $("musicFile").files[0];
+            if (!f) return;
+            revokeMusicBlob();
+            musicObjectUrl = URL.createObjectURL(f);
+            currentSettings.musicUrl = musicObjectUrl;
+            bgMusic.src = musicObjectUrl;
+            $("musicUrl").value = "";
+            applySettings(currentSettings);
+            // don't persist blob URLs
+            saveSettings(Object.assign({}, currentSettings, {
+                musicUrl: ""
+            }));
+        });
+        $("musicPlay").addEventListener("click", function () {
+            if (!bgMusic.src) {
+                toast("Add a music URL or file first");
+                return;
+            }
+            bgMusic.play().catch(function () {
+                toast("Click Play again after interacting with the page");
+            });
+        });
+        $("musicPause").addEventListener("click", function () {
+            bgMusic.pause();
+        });
+        $("musicStop").addEventListener("click", function () {
+            bgMusic.pause();
+            bgMusic.currentTime = 0;
+            $("musicFile").value = "";
+            setMusic("");
+        });
+        $("musicVolume").addEventListener("input", function () {
+            currentSettings.musicVolume = Number($("musicVolume").value);
+            bgMusic.volume = currentSettings.musicVolume / 100;
+            saveSettings(currentSettings);
+        });
+
+        $("settingsReset").addEventListener("click", function () {
+            revokeMusicBlob();
+            bgMusic.pause();
+            currentSettings = defaultSettings();
+            $("bgImageFile").value = "";
+            $("musicFile").value = "";
+            applySettings(currentSettings);
+            saveSettings(currentSettings);
+            toast("Settings reset");
+        });
+
+        // ---------- Live visitor count (demo estimate) ----------
+        // Pure static page cannot know real concurrent users without a backend.
+        // This shows a small, slowly drifting estimate so the UI is present;
+        // replace with WebSocket / presence API in production.
+        function seedOnline() {
+            var h = new Date().getHours();
+            var base = h >= 14 && h <= 23 ? 18: h >= 8 ? 12: 6;
+            return base + Math.floor(Math.random() * 9);
+        }
+        var onlineEst = seedOnline();
+        function tickOnline() {
+            var delta = Math.floor(Math.random() * 3) - 1;
+            onlineEst = Math.max(2,
+                Math.min(48, onlineEst + delta));
+            $("liveCountNum").textContent = String(onlineEst);
+        }
+        tickOnline();
+        setInterval(tickOnline, 12000 + Math.floor(Math.random() * 8000));
+    </script>
+</body>
+</html>
